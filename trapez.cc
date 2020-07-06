@@ -75,7 +75,7 @@ void testeAufgabe1() {
   double rich = richardson(I_g[0], I_g[1]);
   std::cout << "A1: Richardson : " << rich << " : " << (rich == -1.5 ? "ja " : "nein") << std::endl;
 }
-/*
+
 void testeAufgabe2() {
   Pol1 f;
   std::vector<std::vector<double>> Rf = romberg(trapez(f, 0, 3, 3));
@@ -93,11 +93,11 @@ void testeAufgabe2() {
   std::vector<std::vector<double>> Rg = romberg(trapez(g, 0, 3, 3));
   std::cout << "A2: R[1][1] und R[2][1] für g gleich -1.5: " << ((Rg[1][1] == -1.5) && (Rg[2][1] == -1.5) ? " ja " : " nein") << std::endl;
 }
-*/
+
 
 template<class Functor> void tabelle(Functor f) {
   std::vector<double> tf(trapez(f, 0., 3., 3));
-  fout << tf[0] << " " << tf[1] << " " << tf[2] << " " << tf[3] << " | " << richardson(tf[0], tf[1]) << " " << richardson(tf[1], tf[2]) << " " << richardson(tf[2], tf[3]) << std::endl;
+  fout << tf[0] << " " << tf[1] << " " << tf[2] << " " << tf[3] << " | " << richardson(tf[0], tf[1]) << " " << richardson(tf[1], tf[2]) << " " << richardson(tf[2], tf[3]);
 }
 
 int main() {
@@ -113,28 +113,32 @@ int main() {
   for (unsigned int i = 0; i < tff.size(); ++i) { // Schleife ueber Werte im Feld
     std::cout << "I_" << i << " = " << tff[i] << std::endl;
   }
-  /*
+  
   std::cout << "Romberg:\n";
-  std::vector<std::vector<double> > R = romberg(tf);
+  std::vector<std::vector<double> > R = romberg(tff);
   for(int k = 0, l = R.size() ;  k < l ; ++k) {
     for(int n = 0, m = R[k].size() ;  n < m ; ++n) {
       std::cout << R[k][n] << " ";
     }
     std::cout << std::endl;
   }
-  */
+  
   
   testeAufgabe1();
-  /*
+  
   testeAufgabe2();
-  */
+  
+  std::cout << R[0] [R[0].size()-1] << std::endl;
 
   Pol1 f;
   tabelle(f);
+  fout << " | " << "19.5" << std::endl;
   Pol2 g;
   tabelle(g);
+  fout << " | " << "-1.5" << std::endl;
   Gauss h;
   tabelle(h);
+  fout << " | " << "0.498650102" << std::endl;
 
   fout.close();
 
