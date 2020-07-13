@@ -1,11 +1,20 @@
 #include <cmath>
 #include <iostream>
 #include <vector>
+#include <fstream>
+#include <iomanip>
+
+std::ofstream fout("tabelle.txt");
 
 // Testfunktionen als Funktor
 class Pol1 {
 public:
   double operator()(double x) { return 3 * x + 2; }
+};
+
+class Pol2 {
+public:
+  double operator() (double x) { return -2 * x * x + 3 * x + 1; }
 };
 
 class Gauss {
@@ -14,21 +23,23 @@ public:
 };
 
 // berechnet Werte nach Trapezformel von I_0 bis I_N
-std::vector<double> trapez(double a, double b, int N) {
-  Pol1 f;
+template<class Functor> std::vector<double> trapez(Functor f, double a, double b, int N) {
   std::vector<double> I(N + 1); // Feld mit N+1 Eintraegen
   const double h = b - a;
   I[0] = h / 2 * (f(a) + f(b));
   for (int k = 1; k <= N; ++k) {
     int n = pow(2, k);
-    //...
-    I[k] = 0; // setze k-ten Wert im Feld
+    double d = 0;
+    for (int j = 1; j < n; j +=2) {
+      d += f(a + (j * h)/ n);
+    }
+    I[k] = I[k - 1] / 2 + h / n * d; // setze k-ten Wert im Feld
   }
   return I;
 }
 
 // berechnet die Richardsonextrapolation aus I(k-1)  und I(k)
-double richardson(double Iprev, double I) { return 0; }
+double richardson(double Iprev, double I) { return I + (I - Iprev) / 3; }
 
 // berechet Naeherungen ueber das Romberg-Verfahren
 // I: Ergebnis von trapez()
@@ -38,10 +49,20 @@ std::vector<std::vector<double>> romberg(std::vector<double> I) {
   for (int k = 0; k <= N; ++k) {
     R[k].push_back(I[k]);
   }
+
+  for (int l = 0; l < N; ++l) {
+    for (int m = 0; m < N-l; ++m) {
+      double extr = R[m+1][l] + (R[m + 1][l] - R[m][l] )/( pow(2, 2 * (l + 1)) - 1);
+
+      std::cout << extr << std::endl;
+
+      R[m].push_back(extr);
+    }
+  }
   return R;
 }
 
-/*
+
 void testeAufgabe1() {
   Pol1 f;
   std::vector<double> I_f = trapez(f, 0, 3, 3);
@@ -75,31 +96,53 @@ void testeAufgabe2() {
   std::vector<std::vector<double>> Rg = romberg(trapez(g, 0, 3, 3));
   std::cout << "A2: R[1][1] und R[2][1] für g gleich -1.5: " << ((Rg[1][1] == -1.5) && (Rg[2][1] == -1.5) ? " ja " : " nein") << std::endl;
 }
-*/
+
+
+template<class Functor> void tabelle(Functor f) {
+  std::vector<double> tf(trapez(f, 0., 3., 3));
+  fout << tf[0] << " " << tf[1] << " " << tf[2] << " " << tf[3] << " | " << richardson(tf[0], tf[1]) << " " << richardson(tf[1], tf[2]) << " " << richardson(tf[2], tf[3]);
+}
 
 int main() {
   // Testfunktion:
-  Pol1 f;
-  std::cout << "f(0) = " << f(0) << '\n';
-  // berechne Trapezformel fuer f
-  std::vector<double> tf = trapez(0., 3., 3);
+  Pol1 ff;
+  std::cout << "f(0) = " << ff(0) << '\n';
+  // berechne Trapezformel fuer ff
+  std::vector<double> tff = trapez(ff, 0., 3., 3);
   std::cout
       << "#############################################################\n";
   // Ausgabe:
   std::cout << "Trapez:\n";
-  for (unsigned int i = 0; i < tf.size(); ++i) { // Schleife ueber Werte im Feld
-    std::cout << "I_" << i << " = " << tf[i] << std::endl;
+  for (unsigned int i = 0; i < tff.size(); ++i) { // Schleife ueber Werte im Feld
+    std::cout << "I_" << i << " = " << tff[i] << std::endl;
   }
+  
   std::cout << "Romberg:\n";
-  std::vector<std::vector<double> > R = romberg(tf);
+  std::vector<std::vector<double> > R = romberg(tff);
   for(int k = 0, l = R.size() ;  k < l ; ++k) {
     for(int n = 0, m = R[k].size() ;  n < m ; ++n) {
       std::cout << R[k][n] << " ";
     }
     std::cout << std::endl;
   }
-  /*
+  
+  
   testeAufgabe1();
+  
   testeAufgabe2();
-  */
+  
+  std::cout << R[0][R[0].size()-1] << std::endl;
+
+  Pol1 f;
+  tabelle(f);
+  fout << " | " << "19.5" << std::endl;
+  Pol2 g;
+  tabelle(g);
+  fout << " | " << "-1.5" << std::endl;
+  Gauss h;
+  tabelle(h);
+  fout << " | " << "0.498650102" << std::endl;
+
+  fout.close();
+
 }
