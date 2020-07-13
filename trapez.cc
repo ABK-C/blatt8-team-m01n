@@ -51,8 +51,11 @@ std::vector<std::vector<double>> romberg(std::vector<double> I) {
   }
 
   for (int l = 0; l < N; ++l) {
-    for (int m = 0; m < N - l; ++m) {
-      double extr = R[m + 1] [l] + (R[m + 1] [l] - R[m] [l] / pow(2, 2 * (l + 1)) - 1);
+    for (int m = 0; m < N-l; ++m) {
+      double extr = R[m+1][l] + (R[m + 1][l] - R[m][l] )/( pow(2, 2 * (l + 1)) - 1);
+
+      std::cout << extr << std::endl;
+
       R[m].push_back(extr);
     }
   }
@@ -128,7 +131,7 @@ int main() {
   
   testeAufgabe2();
   
-  std::cout << R[0] [R[0].size()-1] << std::endl;
+  std::cout << R[0][R[0].size()-1] << std::endl;
 
   Pol1 f;
   tabelle(f);
